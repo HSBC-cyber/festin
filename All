@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Festin" />
+  <meta name="theme-color" content="#0d0a07" />
+  <title>Le Festin du Silence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { min-height: 100%; background: #0d0a07; font-family: Georgia, serif; color: #e8dcc8; -webkit-font-smoothing: antialiased; }
+    body { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+    ::-webkit-scrollbar { width: 3px; } ::-webkit-scrollbar-track { background: #0d0a07; } ::-webkit-scrollbar-thumb { background: #2a2018; }
+    * { -webkit-tap-highlight-color: transparent; }
+    input, textarea, select { color-scheme: dark; font-family: Georgia, serif; }
+    button { font-family: Georgia, serif; }
+
+```
+#app { min-height: 100vh; background: #0d0a07; }
+
+/* HEADER */
+.header { border-bottom: 1px solid #141008; padding: 28px 20px 18px; text-align: center; position: relative; }
+.header-line { position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, #c9a96e 30%, #8b2020 50%, #c9a96e 70%, transparent); }
+.header-sub { color: #1f1812; font-size: 9px; letter-spacing: 6px; text-transform: uppercase; margin-bottom: 8px; }
+.header-title { font-family: 'Playfair Display', serif; font-size: clamp(22px, 7vw, 40px); font-weight: 700; color: #e8dcc8; margin-bottom: 5px; }
+.header-quote { color: #1f1812; font-size: 11px; font-style: italic; }
+
+/* FILTERS */
+.filters { padding: 14px 16px 0; display: flex; gap: 6px; flex-wrap: wrap; }
+.filter-btn { border: none; padding: 5px 12px; cursor: pointer; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; transition: all .2s; }
+.count { padding: 10px 16px 0; color: #1f1812; font-size: 10px; letter-spacing: 2px; }
+
+/* GRID */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; padding: 12px 16px 100px; }
+
+/* CARD */
+.card { background: linear-gradient(150deg, #181310 0%, #1e1812 100%); border: 1px solid #1f1812; padding: 18px 16px; cursor: pointer; position: relative; overflow: hidden; transition: border-color .2s; }
+.card:active { border-color: #c9a96e; }
+.card-bar { position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+.card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.card-emoji { font-size: 22px; }
+.card-meta { text-align: right; }
+.card-tag { display: block; font-size: 9px; letter-spacing: 2px; color: #2a2018; text-transform: uppercase; }
+.card-price { font-size: 11px; color: #c9a96e; }
+.card-title { font-family: 'Playfair Display', serif; color: #ddd0b8; font-size: 13px; font-weight: 600; margin-bottom: 6px; line-height: 1.4; }
+.card-desc { color: #3a2e22; font-size: 11px; line-height: 1.6; margin-bottom: 10px; font-style: italic; }
+.card-footer { display: flex; justify-content: space-between; align-items: center; }
+.card-time { color: #2a2018; font-size: 10px; }
+.card-rating { color: #c9a96e; font-size: 11px; }
+
+/* FAB */
+.fab { position: fixed; bottom: 24px; right: 20px; z-index: 100; background: linear-gradient(135deg, #2a1a08, #1a1008); border: 1px solid #c9a96e; color: #c9a96e; width: 52px; height: 52px; border-radius: 50%; cursor: pointer; font-size: 24px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(0,0,0,0.6); }
+
+/* SCREEN (detail + add) */
+.screen { position: fixed; inset: 0; z-index: 200; background: #0d0a07; display: flex; flex-direction: column; overflow-y: auto; }
+.screen-header { position: sticky; top: 0; z-index: 10; background: #0d0a07; border-bottom: 1px solid #1a1410; padding: 14px 20px; display: flex; align-items: center; gap: 14px; }
+.back-btn { background: none; border: none; color: #c9a96e; font-size: 22px; cursor: pointer; padding: 2px 8px 2px 0; }
+.screen-header-info { flex: 1; min-width: 0; }
+.screen-tag { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 2px; }
+.screen-title { font-family: 'Playfair Display', serif; color: #e8dcc8; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.screen-emoji { font-size: 28px; }
+
+/* TABS */
+.tabs { display: flex; border-bottom: 1px solid #1a1410; background: #0d0a07; flex-shrink: 0; }
+.tab-btn { flex: 1; background: none; border: none; border-bottom: 2px solid transparent; color: #3a2e22; padding: 12px 4px; cursor: pointer; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; transition: color .2s; }
+.tab-btn.active { color: #c9a96e; }
+
+/* CONTENT */
+.screen-content { padding: 20px 20px 40px; flex: 1; }
+.recipe-meta { display: flex; gap: 12px; margin-bottom: 16px; }
+.recipe-meta span { color: #c9a96e; font-size: 12px; }
+.recipe-desc { color: #6a5a4a; font-style: italic; font-size: 14px; line-height: 1.7; margin-bottom: 22px; padding-left: 14px; }
+.section-title { color: #c9a96e; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px; }
+.ing-list { list-style: none; margin-bottom: 22px; }
+.ing-item { color: #7a6a5a; font-size: 14px; padding: 7px 0; border-bottom: 1px solid #161210; display: flex; gap: 10px; align-items: flex-start; }
+.ing-dot { color: #2a2018; font-size: 7px; margin-top: 6px; flex-shrink: 0; }
+.step-row { display: flex; gap: 14px; margin-bottom: 14px; }
+.step-num { font-family: 'Playfair Display', serif; color: #2a2018; font-size: 22px; min-width: 24px; line-height: 1.3; flex-shrink: 0; }
+.step-text { color: #7a6a5a; font-size: 14px; line-height: 1.75; }
+
+/* SHOPPING */
+.shop-header { display: flex; justify-content: space-between; margin-bottom: 16px; align-items: center; }
+.shop-label { color: #c9a96e; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; }
+.shop-count { color: #2a2018; font-size: 11px; }
+.shop-item { display: flex; align-items: center; gap: 14px; padding: 11px 0; border-bottom: 1px solid #161210; cursor: pointer; }
+.shop-check { width: 18px; height: 18px; border: 1px solid #2a2018; background: transparent; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+.shop-check.done { border-color: #c9a96e; background: #c9a96e; }
+.shop-check.done span { color: #0d0a07; font-size: 11px; font-weight: bold; }
+.shop-text { font-size: 14px; color: #8a7a6a; transition: all .2s; }
+.shop-text.done { color: #2a2018; text-decoration: line-through; }
+.shop-complete { color: #2a5c1a; font-size: 11px; letter-spacing: 2px; text-align: center; margin-top: 16px; font-style: italic; }
+
+/* NOTES */
+.notes-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+.notes-label { color: #c9a96e; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; }
+.stars { display: flex; gap: 6px; }
+.star { font-size: 26px; cursor: pointer; transition: color .2s; user-select: none; }
+.notes-textarea { width: 100%; background: #0c0906; border: 1px solid #1f1812; color: #8a7a6a; font-size: 14px; padding: 14px; resize: vertical; min-height: 140px; font-family: Georgia, serif; font-style: italic; outline: none; line-height: 1.7; }
+.save-btn { margin-top: 14px; width: 100%; background: transparent; padding: 14px; cursor: pointer; font-family: 'Playfair Display', serif; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; }
+
+/* ADD FORM */
+.form-field { margin-bottom: 14px; }
+.form-label { color: #c9a96e; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; display: block; margin-bottom: 5px; }
+.form-input { width: 100%; background: #0c0906; border: 1px solid #1f1812; color: #a09080; font-size: 15px; padding: 11px 12px; outline: none; }
+.form-row { display: flex; gap: 10px; margin-bottom: 14px; }
+.form-row > div { flex: 1; }
+.form-textarea { width: 100%; background: #0c0906; border: 1px solid #1f1812; color: #a09080; font-size: 14px; padding: 11px 12px; outline: none; resize: vertical; font-family: Georgia, serif; }
+.add-btn { width: 100%; background: transparent; border: 1px solid #c9a96e; color: #c9a96e; padding: 16px; cursor: pointer; font-family: 'Playfair Display', serif; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; margin-top: 8px; }
+```
+
+  </style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+const CATEGORIES = {
+  tous:       { label: "Tous",       color: "#c9a96e" },
+  viande:     { label: "Viande",     color: "#8b2020" },
+  abats:      { label: "Abats",      color: "#5c1a1a" },
+  poisson:    { label: "Poisson",    color: "#1a4a5c" },
+  végétarien: { label: "Végétarien", color: "#2a5c1a" },
+};
+
+const INITIAL_RECIPES = [
+  { id:1, title:"Carpaccio de Bœuf aux Câpres & Huile Noire", category:"viande", emoji:"🥩", description:"Fines tranches de bœuf cru, marinées dans une huile d'olive noire infusée aux herbes. Un plat d'une brutalité élégante.", ingredients:["200g de rumsteck","3 c. à s. d'huile d'olive","1 c. à s. de câpres","1 citron","Estragon frais","Sel, poivre noir"], shopping:["200g rumsteck","Câpres (bocal)","1 citron","Estragon frais","Huile d'olive","Sel de Guérande"], steps:["Placer le bœuf 30 min au congélateur.","Trancher très finement.","Disposer en rosace sur assiette froide.","Mélanger huile, citron, sel, poivre.","Verser, parsemer câpres et estragon.","Servir immédiatement."], time:"15 min", price:"€€", rating:0, note:"", tag:"Sans cuisson" },
+  { id:2, title:"Œufs Brouillés au Foie de Volaille & Sauge", category:"abats", emoji:"🍳", description:"Des œufs brouillés d'une douceur soyeuse, traversés par l'âpreté des foies de volaille poêlés à la sauge.", ingredients:["4 œufs","150g foies de volaille","6 feuilles de sauge","2 c. à s. beurre","1 échalote","Sel, poivre"], shopping:["4 œufs","150g foies de volaille","Sauge fraîche","Beurre","1 échalote"], steps:["Nettoyer les foies.","Saisir 2 min/face avec la sauge. Réserver.","Couper les foies en morceaux.","Battre les œufs, cuire à feu doux en remuant.","Incorporer les foies. Servir sur pain grillé."], time:"20 min", price:"€", rating:0, note:"", tag:"Économique" },
+  { id:3, title:"Tartare de Champignons Noirs & Noisettes", category:"végétarien", emoji:"🍄", description:"Un tartare végétal d'une profondeur presque animale. Les champignons séchés recréent une umami inquiétante.", ingredients:["300g champignons de Paris","30g shiitaké séchés","50g noisettes","1 c. à s. sauce soja","1 c. à c. huile de sésame","Ciboulette","Moutarde à l'ancienne"], shopping:["300g champignons de Paris","30g shiitaké séchés","50g noisettes","Sauce soja","Huile de sésame","Ciboulette","Moutarde à l'ancienne"], steps:["Réhydrater shiitakés 20 min, hacher.","Hacher champignons de Paris crus.","Torréfier noisettes à sec 5 min, concasser.","Mélanger champignons, soja, sésame, moutarde.","Incorporer noisettes et ciboulette.","Mouler et servir frais."], time:"30 min", price:"€", rating:0, note:"", tag:"Végétarien" },
+  { id:4, title:"Boudin Noir Poêlé, Pommes & Vinaigre de Xérès", category:"abats", emoji:"🖤", description:"Le vinaigre de xérès tranche l'onctuosité du boudin avec une acidité redoutable.", ingredients:["2 boudins noirs","2 pommes Granny Smith","2 c. à s. vinaigre de xérès","1 c. à s. beurre","Thym frais","Poivre"], shopping:["2 boudins noirs","2 pommes Granny Smith","Vinaigre de xérès","Beurre","Thym frais"], steps:["Couper pommes en quartiers.","Caraméliser au beurre avec thym 8 min.","Déglacer au vinaigre, réduire 1 min.","Cuire boudins 4 min/face dans autre poêle.","Servir boudins sur pommes. Poivrer."], time:"25 min", price:"€", rating:0, note:"", tag:"Économique" },
+  { id:5, title:"Lentilles Beluga au Vin Rouge & Échalotes Confites", category:"végétarien", emoji:"⚫", description:"Les lentilles noires béluga prennent une couleur et une densité de caviar. Un plat végétarien qui n'a rien d'humble.", ingredients:["200g lentilles béluga","200ml vin rouge","3 échalotes","2 gousses d'ail","Thym, laurier","Huile d'olive"], shopping:["200g lentilles béluga","200ml vin rouge","3 échalotes","1 tête d'ail","Thym frais","Laurier"], steps:["Confire échalotes à l'huile 15 min.","Ajouter ail, cuire 2 min.","Verser vin, réduire de moitié.","Ajouter lentilles, thym, laurier, eau à hauteur.","Cuire 20-25 min. Servir avec huile crue."], time:"40 min", price:"€", rating:0, note:"", tag:"Végétarien" },
+  { id:6, title:"Tataki de Thon, Gingembre & Sésame Noir", category:"poisson", emoji:"🐟", description:"Le thon saisi en surface, cru en son cœur. La croûte de sésame noir contraste avec la chair rose froide.", ingredients:["300g thon steak épais","2 c. à s. sésame noir","1 c. à c. gingembre râpé","Sauce soja","Huile de sésame","1 lime","Coriandre"], shopping:["300g thon rouge","Sésame noir","Gingembre frais","Sauce soja","Huile de sésame","1 lime","Coriandre fraîche"], steps:["Rouler le thon dans sésame + gingembre.","Poêle à feu maximum, saisir 30 sec/face.","Reposer 2 min, trancher finement.","Disposer en éventail.","Arroser soja, sésame, lime. Garnir coriandre."], time:"15 min", price:"€€", rating:0, note:"", tag:"Sans four" },
+  { id:7, title:"Soupe Miso Noire aux Algues & Tofu Soyeux", category:"végétarien", emoji:"🍵", description:"Une soupe d'une profondeur abyssale. Le miso noir apporte une complexité fermentée méditative.", ingredients:["1 l eau","2 c. à s. miso noir","150g tofu soyeux","10g algues wakamé","2 oignons verts","Kombu séché"], shopping:["Miso noir hatcho","150g tofu soyeux","Algues wakamé séchées","2 oignons verts","Kombu séché"], steps:["Frémir l'eau avec kombu — ne pas bouillir.","Retirer kombu, réhydrater wakamé.","Dissoudre miso dans une louche tiède.","Incorporer au bouillon.","Ajouter tofu et algues. Servir aussitôt."], time:"20 min", price:"€", rating:0, note:"", tag:"Végétarien" },
+  { id:8, title:"Magret de Canard à la Poêle, Réduction Grenade", category:"viande", emoji:"🦆", description:"La réduction de grenade apporte une couleur de sang et une acidité fruitée. Dramatique et juste.", ingredients:["1 magret de canard","200ml jus de grenade","1 c. à s. miel","Romarin frais","Sel, poivre","Graines de grenade"], shopping:["1 magret de canard","200ml jus de grenade","Miel","Romarin frais","1 grenade fraîche"], steps:["Quadriller la peau sans atteindre la chair.","Cuire côté peau dans poêle froide 8-10 min.","Retourner, cuire 4 min côté chair.","Reposer 5 min sous alu.","Réduire jus grenade + miel 5 min.","Trancher, napper, garnir de graines."], time:"30 min", price:"€€", rating:0, note:"", tag:"Sans four" },
+  { id:9, title:"Steak Haché au Beurre Noir & Câpres Frites", category:"viande", emoji:"🫀", description:"Un steak haché noble nappé d'un beurre noisette poussé jusqu'au noir. Les câpres frites explosent sous la dent.", ingredients:["300g bœuf haché 15% MG","40g beurre","2 c. à s. câpres","1 c. à s. vinaigre de vin","Persil plat","Sel, poivre"], shopping:["300g bœuf haché","40g beurre","Câpres (bocal)","Vinaigre de vin","Persil plat"], steps:["Former 2 steaks épais, saler, poivrer.","Saisir 2 min/face à feu vif. Réserver.","Fondre beurre jusqu'à noisette foncée.","Ajouter câpres, crépiter 1 min.","Hors feu, ajouter vinaigre. Napper."], time:"15 min", price:"€", rating:0, note:"", tag:"Économique" },
+  { id:10, title:"Cuisses de Poulet à l'Ail Noir & Citron Confit", category:"viande", emoji:"🍗", description:"L'ail noir fondant comme de la cire, le citron confit apportant une amertume solaire. Patience récompensée.", ingredients:["2 cuisses de poulet","4 gousses d'ail","½ citron confit","Thym, romarin","Huile d'olive","Sel, poivre"], shopping:["2 cuisses de poulet","1 tête d'ail","½ citron confit ou 1 citron","Thym frais","Romarin frais"], steps:["Saler sous la peau. Poêle huilée à feu moyen.","Cuire côté peau 12-15 min sans bouger.","Retourner, ajouter ail, herbes, citron.","Couvrir à moitié, cuire 15 min à feu doux.","Servir avec le jus de cuisson."], time:"40 min", price:"€", rating:0, note:"", tag:"Économique" },
+  { id:11, title:"Rognons de Veau à la Moutarde & Cognac", category:"abats", emoji:"🫁", description:"Les rognons rosés, noyés dans une sauce moutarde que le cognac flambé transforme en quelque chose de presque dangereux.", ingredients:["300g rognons de veau","2 c. à s. moutarde de Dijon","50ml cognac","100ml crème liquide","1 échalote","Beurre"], shopping:["300g rognons de veau","Moutarde de Dijon","Mini-bouteille cognac","100ml crème liquide","1 échalote","Beurre"], steps:["Couper rognons, retirer gras central.","Revenir échalote 3 min.","Saisir rognons 2 min — rester rosés.","Flamber au cognac.","Ajouter crème et moutarde, cuire 3 min doux.","Servir immédiatement."], time:"25 min", price:"€€", rating:0, note:"", tag:"Sans four" },
+  { id:12, title:"Langue de Bœuf Froide, Sauce Gribiche", category:"abats", emoji:"👅", description:"Servie froide avec une sauce gribiche acérée. La noblesse du dépouillement.", ingredients:["400g langue de bœuf précuite","3 œufs durs","1 c. à s. moutarde","2 c. à s. vinaigre de vin","4 c. à s. huile","Câpres, cornichons","Persil"], shopping:["400g langue de bœuf (bocal)","3 œufs","Moutarde","Vinaigre de vin","Câpres","Cornichons","Persil frais"], steps:["Trancher la langue finement.","Écraser jaunes durs + moutarde.","Monter à l'huile en fouettant.","Ajouter vinaigre, câpres, cornichons, blancs hachés, herbes.","Napper les tranches généreusement."], time:"30 min", price:"€", rating:0, note:"", tag:"Économique" },
+  { id:13, title:"Maquereau Poêlé, Beurre d'Anchois & Câpres", category:"poisson", emoji:"🐠", description:"Le beurre d'anchois double la profondeur marine du maquereau. Une honnêteté brutale.", ingredients:["4 filets de maquereau","4 filets d'anchois","40g beurre","1 c. à s. câpres","1 citron","Persil"], shopping:["4 filets de maquereau","Boîte anchois à l'huile","Beurre","Câpres","1 citron","Persil frais"], steps:["Sécher filets, saler côté chair.","Cuire côté peau 4 min à feu vif.","Retourner, 2 min côté chair. Réserver.","Fondre beurre + anchois écrasés.","Ajouter câpres, citron. Napper."], time:"20 min", price:"€", rating:0, note:"", tag:"Économique" },
+  { id:14, title:"Ceviche de Saint-Jacques à la Pamplemousse", category:"poisson", emoji:"🫧", description:"Les Saint-Jacques 'cuites' par l'acidité du pamplemousse rouge. La mort sans chaleur.", ingredients:["200g noix de Saint-Jacques","1 pamplemousse rouge","1 lime","1 piment rouge","Coriandre","Huile de sésame"], shopping:["200g noix de Saint-Jacques","1 pamplemousse rouge","1 lime","1 piment rouge","Coriandre fraîche","Huile de sésame"], steps:["Trancher les Saint-Jacques en rondelles.","Presser pamplemousse et lime.","Verser les jus sur les Saint-Jacques.","Réfrigérer 8-10 min.","Ajouter piment, sésame, coriandre. Servir."], time:"20 min", price:"€€", rating:0, note:"", tag:"Sans cuisson" },
+  { id:15, title:"Sardines à l'Escabèche, Oignons Rouges & Orange", category:"poisson", emoji:"🐡", description:"La marinade chaude transforme les sardines en quelque chose de complexe et durable.", ingredients:["8 sardines fraîches","1 oignon rouge","1 orange","100ml vinaigre vin blanc","Paprika fumé","Laurier","Huile d'olive"], shopping:["8 sardines fraîches","1 oignon rouge","1 orange","Vinaigre vin blanc","Paprika fumé","Laurier"], steps:["Saisir sardines 2 min/face. Réserver.","Revenir oignon en rondelles 5 min.","Ajouter zeste + jus orange, vinaigre, paprika, laurier.","Frémir 5 min.","Verser sur sardines, laisser refroidir."], time:"30 min + repos", price:"€", rating:0, note:"", tag:"Économique" },
+  { id:16, title:"Œufs en Meurette, Sauce au Vin Rouge", category:"végétarien", emoji:"🥚", description:"Le blanc coagulé dans l'obscurité du vin, le jaune encore liquide. Un tableau.", ingredients:["4 œufs très frais","300ml vin rouge","1 oignon","1 carotte","Bouquet garni","Beurre","Farine"], shopping:["4 œufs très frais","300ml vin rouge","1 oignon","1 carotte","Thym + laurier","Beurre","Pain de campagne"], steps:["Frémir vin avec oignon, carotte, bouquet garni 10 min.","Retirer légumes.","Pocher œufs 3 min dans le vin frémissant.","Égoutter sur papier.","Faire roux, incorporer vin de cuisson. Napper."], time:"30 min", price:"€", rating:0, note:"", tag:"Végétarien" },
+  { id:17, title:"Risotto à l'Encre de Seiche & Parmesan", category:"végétarien", emoji:"🦑", description:"Un risotto d'un noir absolu. Le parmesan fond dans l'obscurité. Visuellement perturbant.", ingredients:["160g riz arborio","2 sachets encre de seiche","1 verre vin blanc sec","1 échalote","Parmesan","Beurre","Bouillon de légumes"], shopping:["160g riz arborio","Encre de seiche (sachets)","Vin blanc sec","1 échalote","Parmesan","Beurre","Cube bouillon légumes"], steps:["Revenir échalote 3 min.","Nacrer le riz 2 min.","Absorber le vin blanc.","Encre dans bouillon chaud, ajouter louche par louche 18 min.","Mantecare beurre + parmesan hors feu."], time:"35 min", price:"€€", rating:0, note:"", tag:"Végétarien" },
+  { id:18, title:"Aubergines Brûlées, Tahini & Grenade", category:"végétarien", emoji:"🍆", description:"Les aubergines sur la flamme vive jusqu'à carbonisation. La chair fumée avec le tahini crémeux.", ingredients:["2 aubergines","3 c. à s. tahini","1 citron","1 gousse d'ail","Graines de grenade","Persil plat","Cumin"], shopping:["2 aubergines","Tahini","1 citron","1 grenade","Persil plat","Cumin en poudre"], steps:["Brûler aubergines sur flamme gaz 15-20 min.","Laisser refroidir, récupérer la chair.","Égoutter 10 min.","Écraser avec tahini, citron, ail, cumin.","Garnir grenade, persil, huile d'olive."], time:"40 min", price:"€", rating:0, note:"", tag:"Végétarien" },
+  { id:19, title:"Ravioles à la Poêle, Beurre Sauge Noisette", category:"végétarien", emoji:"🫙", description:"Des ravioles du commerce transformées par un beurre noisette et la sauge frite.", ingredients:["250g ravioles fraîches","50g beurre","8 feuilles de sauge","Parmesan","Poivre concassé"], shopping:["250g ravioles fraîches (frigo)","50g beurre","Sauge fraîche","Parmesan"], steps:["Cuire ravioles 2 min, égoutter.","Fondre beurre à feu moyen-vif.","Frire sauge 1 min, poursuivre jusqu'à noisette.","Sauter ravioles 2 min dans le beurre.","Servir avec copeaux de parmesan."], time:"15 min", price:"€", rating:0, note:"", tag:"Végétarien" },
+  { id:20, title:"Gaspacho Noir à la Tomate Fumée & Paprika", category:"végétarien", emoji:"🍅", description:"Teinté par le paprika fumé jusqu'à une couleur bordeaux presque noire. Servi glacé, il entre comme une lame.", ingredients:["500g tomates mûres","1 concombre","1 poivron rouge","1 gousse d'ail","Vinaigre de xérès","Paprika fumé fort","Huile d'olive"], shopping:["500g tomates mûres","1 concombre","1 poivron rouge","1 gousse d'ail","Vinaigre de xérès","Paprika fumé fort","Basilic frais"], steps:["Couper grossièrement tous les légumes.","Mixer avec ail, vinaigre, paprika, huile, sel.","Passer au tamis fin.","Réfrigérer 1h minimum.","Servir dans verre sombre avec huile d'olive."], time:"20 min + 1h froid", price:"€", rating:0, note:"", tag:"Sans cuisson" },
+  { id:21, title:"Côtes de Porc Laquées au Miso & Gingembre", category:"viande", emoji:"🐖", description:"Le miso caramélise en une croûte sombre, presque brûlée. Un laquage de précision sans four.", ingredients:["2 côtes de porc","2 c. à s. miso blanc","1 c. à s. sauce soja","1 c. à s. miel","1 c. à c. gingembre râpé","Huile de sésame"], shopping:["2 côtes de porc","Miso blanc","Sauce soja","Miel","Gingembre frais","Huile de sésame"], steps:["Mélanger miso, soja, miel, gingembre, ail.","Enduire les côtes, mariner 20 min.","Poêle huilée à feu moyen.","Cuire 5-6 min/face — laque doit noircir légèrement.","Reposer 3 min avant de servir."], time:"35 min", price:"€€", rating:0, note:"", tag:"Sans four" },
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+function loadRecipes() {
+  try { const s = localStorage.getItem('festin'); return s ? JSON.parse(s) : INITIAL_RECIPES; } catch { return INITIAL_RECIPES; }
+}
+function saveRecipes(r) {
+  try { localStorage.setItem('festin', JSON.stringify(r)); } catch {}
+}
+
+let state = {
+  recipes: loadRecipes(),
+  filter: 'tous',
+  selected: null,
+  showAdd: false,
+  tab: 'recette',
+  shopChecked: {},
+  form: { title:'', category:'viande', emoji:'🍽️', description:'', ingredients:'', shopping:'', steps:'', time:'', price:'€', tag:'' },
+  editNote: '',
+  editRating: 0,
+};
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function render() {
+  const app = document.getElementById('app');
+  app.innerHTML = '';
+
+  if (state.selected) { app.appendChild(renderDetail()); return; }
+  if (state.showAdd)  { app.appendChild(renderAdd());    return; }
+  app.appendChild(renderHome());
+}
+
+function renderHome() {
+  const div = el('div', { id: 'home' });
+
+  // Header
+  const hdr = el('div', { className: 'header' });
+  hdr.appendChild(el('div', { className: 'header-line' }));
+  hdr.appendChild(el('p',   { className: 'header-sub',   textContent: 'Répertoire Culinaire Privé' }));
+  hdr.appendChild(el('h1',  { className: 'header-title', textContent: 'Le Festin du Silence' }));
+  hdr.appendChild(el('p',   { className: 'header-quote', textContent: '« Rude is what it is to eat the rude. »' }));
+  div.appendChild(hdr);
+
+  // Filters
+  const filters = el('div', { className: 'filters' });
+  Object.entries(CATEGORIES).forEach(([key, val]) => {
+    const active = state.filter === key;
+    const btn = el('button', {
+      className: 'filter-btn',
+      textContent: val.label,
+      style: `background:${active ? val.color : 'transparent'};border:1px solid ${active ? val.color : '#1f1812'};color:${active ? '#0d0a07' : '#3a2e22'};`
+    });
+    btn.addEventListener('click', () => { state.filter = key; render(); });
+    filters.appendChild(btn);
+  });
+  div.appendChild(filters);
+
+  // Count
+  const filtered = state.filter === 'tous' ? state.recipes : state.recipes.filter(r => r.category === state.filter);
+  div.appendChild(el('p', { className: 'count', textContent: `${filtered.length} recette${filtered.length > 1 ? 's' : ''} au répertoire` }));
+
+  // Grid
+  const grid = el('div', { className: 'grid' });
+  filtered.forEach(r => grid.appendChild(renderCard(r)));
+  div.appendChild(grid);
+
+  // FAB
+  const fab = el('button', { className: 'fab', textContent: '+' });
+  fab.addEventListener('click', () => { state.showAdd = true; state.form = { title:'', category:'viande', emoji:'🍽️', description:'', ingredients:'', shopping:'', steps:'', time:'', price:'€', tag:'' }; render(); });
+  div.appendChild(fab);
+
+  return div;
+}
+
+function renderCard(r) {
+  const catColor = CATEGORIES[r.category]?.color || '#c9a96e';
+  const card = el('div', { className: 'card' });
+  card.appendChild(el('div', { className: 'card-bar', style: `background:${catColor}` }));
+
+  const top = el('div', { className: 'card-top' });
+  top.appendChild(el('span', { className: 'card-emoji', textContent: r.emoji }));
+  const meta = el('div', { className: 'card-meta' });
+  meta.appendChild(el('span', { className: 'card-tag', textContent: r.tag }));
+  meta.appendChild(el('span', { className: 'card-price', textContent: r.price }));
+  top.appendChild(meta);
+  card.appendChild(top);
+
+  card.appendChild(el('h3', { className: 'card-title', textContent: r.title }));
+  card.appendChild(el('p', { className: 'card-desc', textContent: r.description.slice(0, 70) + '…' }));
+
+  const footer = el('div', { className: 'card-footer' });
+  footer.appendChild(el('span', { className: 'card-time', textContent: '⏱ ' + r.time }));
+  if (r.rating > 0) footer.appendChild(el('span', { className: 'card-rating', textContent: '★'.repeat(r.rating) }));
+  card.appendChild(footer);
+
+  card.addEventListener('click', () => { state.selected = r; state.tab = 'recette'; state.shopChecked = {}; state.editNote = r.note || ''; state.editRating = r.rating || 0; render(); });
+  return card;
+}
+
+function renderDetail() {
+  const r = state.selected;
+  const catColor = CATEGORIES[r.category]?.color || '#c9a96e';
+  const screen = el('div', { className: 'screen' });
+
+  // Header
+  const hdr = el('div', { className: 'screen-header' });
+  const back = el('button', { className: 'back-btn', textContent: '←' });
+  back.addEventListener('click', () => { state.selected = null; render(); });
+  hdr.appendChild(back);
+  const info = el('div', { className: 'screen-header-info' });
+  info.appendChild(el('p', { className: 'screen-tag', style: `color:${catColor}`, textContent: r.tag }));
+  info.appendChild(el('h2', { className: 'screen-title', textContent: r.title }));
+  hdr.appendChild(info);
+  hdr.appendChild(el('span', { className: 'screen-emoji', textContent: r.emoji }));
+  screen.appendChild(hdr);
+
+  // Tabs
+  const tabs = el('div', { className: 'tabs' });
+  [['recette','Recette'],['courses','🛒 Courses'],['notes','Notes']].forEach(([t, label]) => {
+    const btn = el('button', { className: 'tab-btn' + (state.tab === t ? ' active' : ''), textContent: label });
+    if (state.tab === t) btn.style.borderBottomColor = catColor;
+    btn.addEventListener('click', () => { state.tab = t; render(); });
+    tabs.appendChild(btn);
+  });
+  screen.appendChild(tabs);
+
+  // Content
+  const content = el('div', { className: 'screen-content' });
+
+  if (state.tab === 'recette') {
+    const meta = el('div', { className: 'recipe-meta' });
+    meta.appendChild(el('span', { textContent: '⏱ ' + r.time }));
+    meta.appendChild(el('span', { textContent: r.price }));
+    content.appendChild(meta);
+
+    const desc = el('p', { className: 'recipe-desc', textContent: r.description });
+    desc.style.borderLeft = `2px solid ${catColor}`;
+    content.appendChild(desc);
+
+    content.appendChild(el('p', { className: 'section-title', textContent: 'Ingrédients' }));
+    const ul = el('ul', { className: 'ing-list' });
+    r.ingredients.forEach(ing => {
+      const li = el('li', { className: 'ing-item' });
+      li.appendChild(el('span', { className: 'ing-dot', textContent: '◆' }));
+      li.appendChild(el('span', { textContent: ing }));
+      ul.appendChild(li);
+    });
+    content.appendChild(ul);
+
+    content.appendChild(el('p', { className: 'section-title', textContent: 'Préparation' }));
+    r.steps.forEach((step, i) => {
+      const row = el('div', { className: 'step-row' });
+      row.appendChild(el('span', { className: 'step-num', textContent: i + 1 }));
+      row.appendChild(el('p', { className: 'step-text', textContent: step }));
+      content.appendChild(row);
+    });
+  }
+
+  if (state.tab === 'courses') {
+    const items = r.shopping || r.ingredients;
+    const done = Object.values(state.shopChecked).filter(Boolean).length;
+
+    const sh = el('div', { className: 'shop-header' });
+    sh.appendChild(el('span', { className: 'shop-label', textContent: '🛒 Courses — 2 personnes' }));
+    sh.appendChild(el('span', { className: 'shop-count', id: 'shop-count', textContent: `${done}/${items.length}` }));
+    content.appendChild(sh);
+
+    items.forEach((item, i) => {
+      const row = el('div', { className: 'shop-item' });
+      const chk = el('div', { className: 'shop-check' + (state.shopChecked[i] ? ' done' : '') });
+      if (state.shopChecked[i]) chk.appendChild(el('span', { textContent: '✓' }));
+      const txt = el('span', { className: 'shop-text' + (state.shopChecked[i] ? ' done' : ''), textContent: item });
+      row.appendChild(chk); row.appendChild(txt);
+      row.addEventListener('click', () => { state.shopChecked[i] = !state.shopChecked[i]; render(); });
+      content.appendChild(row);
+    });
+
+    if (done === items.length && items.length > 0) {
+      content.appendChild(el('p', { className: 'shop-complete', textContent: 'Provisions complètes. Vous êtes prêt.' }));
+    }
+  }
+
+  if (state.tab === 'notes') {
+    const nh = el('div', { className: 'notes-header' });
+    nh.appendChild(el('span', { className: 'notes-label', textContent: 'Appréciation' }));
+    const stars = el('div', { className: 'stars' });
+    [1,2,3,4,5].forEach(s => {
+      const star = el('span', { className: 'star', textContent: '★', style: `color:${s <= state.editRating ? '#c9a96e' : '#2a2018'}` });
+      star.addEventListener('click', () => { state.editRating = s === state.editRating ? 0 : s; render(); });
+      stars.appendChild(star);
+    });
+    nh.appendChild(stars);
+    content.appendChild(nh);
+
+    const ta = el('textarea', { className: 'notes-textarea', placeholder: 'Vos observations, modifications, impressions…' });
+    ta.value = state.editNote;
+    ta.addEventListener('input', e => { state.editNote = e.target.value; });
+    content.appendChild(ta);
+
+    const saveBtn = el('button', { className: 'save-btn', textContent: 'Sauvegarder', style: `border:1px solid ${catColor};color:${catColor}` });
+    saveBtn.addEventListener('click', () => {
+      state.recipes = state.recipes.map(rec => rec.id === r.id ? { ...rec, note: state.editNote, rating: state.editRating } : rec);
+      state.selected = { ...r, note: state.editNote, rating: state.editRating };
+      saveRecipes(state.recipes);
+      render();
+    });
+    content.appendChild(saveBtn);
+  }
+
+  screen.appendChild(content);
+  return screen;
+}
+
+function renderAdd() {
+  const screen = el('div', { className: 'screen' });
+
+  const hdr = el('div', { className: 'screen-header' });
+  const back = el('button', { className: 'back-btn', textContent: '←' });
+  back.addEventListener('click', () => { state.showAdd = false; render(); });
+  hdr.appendChild(back);
+  hdr.appendChild(el('h2', { style: "font-family:'Playfair Display',serif;color:#e8dcc8;font-size:17px", textContent: 'Nouvelle Recette' }));
+  screen.appendChild(hdr);
+
+  const form = el('div', { style: 'padding:20px 20px 48px' });
+
+  const addField = (label, key, type = 'input') => {
+    const wrap = el('div', { className: 'form-field' });
+    wrap.appendChild(el('label', { className: 'form-label', textContent: label }));
+    let input;
+    if (type === 'textarea') {
+      input = el('textarea', { className: 'form-textarea', style: `min-height:${key==='steps'?'120px':key==='description'?'70px':'90px'}` });
+      input.value = state.form[key];
+    } else {
+      input = el('input', { className: 'form-input' });
+      input.value = state.form[key];
+    }
+    input.addEventListener('input', e => { state.form[key] = e.target.value; });
+    wrap.appendChild(input);
+    form.appendChild(wrap);
+  };
+
+  addField('Titre *', 'title');
+  addField('Emoji', 'emoji');
+  addField('Temps de préparation', 'time');
+  addField('Tag (ex: Végétarien, Sans four…)', 'tag');
+
+  // Row catégorie + prix
+  const row = el('div', { className: 'form-row' });
+  const catWrap = el('div');
+  catWrap.appendChild(el('label', { className: 'form-label', textContent: 'Catégorie' }));
+  const catSel = el('select', { className: 'form-input', style: 'cursor:pointer' });
+  Object.entries(CATEGORIES).filter(([k]) => k !== 'tous').forEach(([k, v]) => {
+    const opt = el('option', { value: k, textContent: v.label });
+    if (state.form.category === k) opt.selected = true;
+    catSel.appendChild(opt);
+  });
+  catSel.addEventListener('change', e => { state.form.category = e.target.value; });
+  catWrap.appendChild(catSel);
+  row.appendChild(catWrap);
+
+  const prixWrap = el('div');
+  prixWrap.appendChild(el('label', { className: 'form-label', textContent: 'Prix' }));
+  const prixSel = el('select', { className: 'form-input', style: 'cursor:pointer' });
+  [['€','€ Modeste'],['€€','€€ Raisonnable'],['€€€','€€€ Raffiné']].forEach(([v, t]) => {
+    const opt = el('option', { value: v, textContent: t });
+    if (state.form.price === v) opt.selected = true;
+    prixSel.appendChild(opt);
+  });
+  prixSel.addEventListener('change', e => { state.form.price = e.target.value; });
+  prixWrap.appendChild(prixSel);
+  row.appendChild(prixWrap);
+  form.appendChild(row);
+
+  addField('Description', 'description', 'textarea');
+  addField('Ingrédients — un par ligne', 'ingredients', 'textarea');
+  addField('Liste de courses (2 pers.) — un par ligne', 'shopping', 'textarea');
+  addField('Étapes — une par ligne', 'steps', 'textarea');
+
+  const addBtn = el('button', { className: 'add-btn', textContent: 'Inscrire au Répertoire' });
+  addBtn.addEventListener('click', () => {
+    if (!state.form.title.trim()) return;
+    const newR = {
+      id: Date.now(),
+      ...state.form,
+      ingredients: state.form.ingredients.split('\n').filter(Boolean),
+      shopping: state.form.shopping.split('\n').filter(Boolean),
+      steps: state.form.steps.split('\n').filter(Boolean),
+      rating: 0, note: ''
+    };
+    state.recipes = [...state.recipes, newR];
+    saveRecipes(state.recipes);
+    state.showAdd = false;
+    render();
+  });
+  form.appendChild(addBtn);
+  screen.appendChild(form);
+  return screen;
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function el(tag, props = {}) {
+  const e = document.createElement(tag);
+  Object.entries(props).forEach(([k, v]) => {
+    if (k === 'style' && typeof v === 'string') e.style.cssText += v;
+    else if (k in e) e[k] = v;
+    else e.setAttribute(k, v);
+  });
+  return e;
+}
+
+// ── BOOT ──────────────────────────────────────────────────────────────────────
+render();
+</script>
+
+</body>
+</html>
